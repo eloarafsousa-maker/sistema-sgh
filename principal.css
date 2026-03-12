@@ -1,0 +1,721 @@
+/* ============================================================
+   PRINCIPAL.CSS — SGH · Sistema de Gestão Hídrica
+   Foco: clareza visual, leitura rápida, ambiente industrial
+   ============================================================ */
+
+:root {
+  --azul:       #1a4fa0;
+  --azul-esc:   #0f2d5e;
+  --laranja:    #e8472a;
+  --fundo:      #f0f2f5;
+  --fundo-card: #ffffff;
+  --borda:      #dde1e9;
+  --texto:      #1c1c2e;
+  --sec:        #5a6278;
+  --fonte:      'Inter', sans-serif;
+
+  /* Cores de status — usadas nos cards e badges */
+  --verde:      #1a7a3a;
+  --verde-bg:   #e6f4eb;
+  --amarelo:    #7a5800;
+  --amarelo-bg: #fff8e1;
+  --vermelho:   #a01a1a;
+  --vermelho-bg:#fde8e8;
+
+  --sidebar-w:  224px;
+  --topbar-h:   52px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--fonte);
+  background: var(--fundo);
+  color: var(--texto);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--azul-esc);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform 0.25s;
+}
+
+.sidebar-topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 14px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.logo-mini {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.logo-mini .s, .logo-mini .h { color: var(--laranja); }
+.logo-mini .g                 { color: #5b9bd5; }
+
+.sidebar-empresa {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.sidebar-empresa strong { color: #fff; font-size: 12px; }
+.sidebar-empresa small  { color: #7a90b5; font-size: 11px; }
+
+/* Itens do menu */
+.menu { list-style: none; flex: 1; padding: 8px 0; }
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 16px;
+  color: #8a9bb5;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+}
+
+/* Ícone levemente maior — mais fácil de identificar */
+.menu-item i { font-size: 17px; width: 20px; flex-shrink: 0; }
+
+.menu-item:hover { background: rgba(255,255,255,0.06); color: #c8d8f0; }
+
+.menu-item.ativo {
+  background: var(--azul);
+  color: #fff;
+  border-left-color: var(--laranja);
+  font-weight: 600;
+}
+
+/* Rodapé sidebar */
+.sidebar-rodape {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-usuario {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #7a90b5;
+}
+.info-usuario i { font-size: 15px; }
+
+.btn-sair {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #7a90b5;
+  padding: 7px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--fonte);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.btn-sair:hover { background: rgba(255,255,255,0.07); color: #fff; }
+
+/* ============================================================
+   TOPBAR
+   ============================================================ */
+#topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: var(--topbar-h);
+  background: #fff;
+  border-bottom: 1px solid var(--borda);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  z-index: 99;
+}
+
+#btn-menu {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--sec);
+  cursor: pointer;
+  line-height: 1;
+}
+
+#titulo-tela {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--azul-esc);
+  flex: 1;
+}
+
+/* Relógio em tempo real — útil no ambiente industrial */
+.relogio {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sec);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   ÁREA DE CONTEÚDO
+   ============================================================ */
+#conteudo {
+  margin-left: var(--sidebar-w);
+  margin-top: var(--topbar-h);
+  padding: 24px;
+  min-height: calc(100vh - var(--topbar-h));
+}
+
+.tela           { display: none; }
+.tela.ativa     { display: block; }
+
+/* ============================================================
+   TELA 1: STATUS GERAL
+   ============================================================ */
+.boas-vindas {
+  background: var(--azul);
+  color: #fff;
+  border-radius: 5px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.saudacao { font-size: 17px; font-weight: 700; }
+.saudacao-sub { font-size: 12px; opacity: 0.75; margin-top: 3px; }
+.data-hoje { font-size: 12px; opacity: 0.75; text-align: right; }
+
+/* Painel de status: 4 cards lado a lado
+   Cada card ocupa bastante espaço — fácil de ler de longe */
+.painel-status {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.card-status {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda);
+  border-top: 4px solid var(--borda); /* cor muda com JS conforme status */
+  border-radius: 5px;
+  padding: 18px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Nome do parâmetro */
+.status-param {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--sec);
+}
+
+/* Valor principal — GRANDE para leitura rápida */
+.status-valor {
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--azul-esc);
+  line-height: 1;
+  margin: 2px 0;
+}
+.status-valor small {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--sec);
+}
+
+/* Faixa aceitável */
+.status-limite {
+  font-size: 11px;
+  color: var(--sec);
+}
+
+/* Badge de status */
+.status-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  margin-top: 4px;
+  width: fit-content;
+
+  /* Padrão: normal */
+  background: var(--verde-bg);
+  color: var(--verde);
+}
+
+/* Modificadores de cor do card conforme status */
+.card-status.status-ok       { border-top-color: #27ae60; }
+.card-status.status-atencao  { border-top-color: #e6a817; }
+.card-status.status-critico  { border-top-color: #c0392b; }
+
+.card-status.status-atencao .status-badge {
+  background: var(--amarelo-bg);
+  color: var(--amarelo);
+}
+.card-status.status-critico .status-badge {
+  background: var(--vermelho-bg);
+  color: var(--vermelho);
+}
+
+.ultima-atualizacao {
+  font-size: 12px;
+  color: var(--sec);
+  margin-bottom: 10px;
+}
+
+.aviso-modo {
+  font-size: 12px;
+  color: var(--azul);
+  background: #eaf0fb;
+  border-left: 3px solid var(--azul);
+  padding: 9px 13px;
+  border-radius: 0 4px 4px 0;
+}
+
+/* ============================================================
+   TELA 2: REGISTRAR LEITURA — formulário simples e grande
+   ============================================================ */
+.tela-cabecalho {
+  margin-bottom: 22px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--borda);
+}
+.tela-cabecalho h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--azul-esc);
+}
+.tela-cabecalho p {
+  font-size: 13px;
+  color: var(--sec);
+  margin-top: 4px;
+}
+
+/* Formulário de registro: campos empilhados, largos e confortáveis */
+.form-registro {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda);
+  border-radius: 5px;
+  padding: 24px;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campo-grande {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.campo-grande label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--sec);
+}
+
+/* Inputs e selects grandes — fáceis de clicar */
+.input-grande,
+.select-grande {
+  width: 100%;
+  padding: 12px 13px;
+  font-size: 15px;
+  font-family: var(--fonte);
+  color: var(--texto);
+  background: var(--fundo);
+  border: 1.5px solid var(--borda);
+  border-radius: 4px;
+  transition: border-color 0.15s, background 0.15s;
+  -webkit-appearance: none;
+}
+.input-grande:focus,
+.select-grande:focus {
+  outline: none;
+  border-color: var(--azul);
+  background: #fff;
+}
+.input-grande:disabled,
+.select-grande:disabled { background: #eef0f3; color: #aaa; cursor: not-allowed; }
+
+/* Botão de registrar — ocupa toda a largura, bem alto, fácil de pressionar */
+.btn-registrar {
+  width: 100%;
+  padding: 14px;
+  background: var(--azul);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--fonte);
+  cursor: pointer;
+  transition: background 0.15s;
+  letter-spacing: 0.3px;
+}
+.btn-registrar:hover { background: var(--azul-esc); }
+
+/* Feedback de ação */
+.feedback {
+  padding: 10px 13px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.feedback.ok   { background: var(--verde-bg); color: var(--verde); border: 1px solid #b6e4c5; }
+.feedback.erro { background: var(--vermelho-bg); color: var(--vermelho); border: 1px solid #f5b8b8; }
+
+/* Card de confirmação da última leitura */
+.ultima-leitura {
+  margin-top: 16px;
+  background: var(--verde-bg);
+  border: 1px solid #b6e4c5;
+  border-radius: 5px;
+  padding: 16px 20px;
+  max-width: 520px;
+}
+.ul-titulo { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--verde); margin-bottom: 4px; }
+.ul-dado   { font-size: 16px; font-weight: 700; color: var(--azul-esc); }
+.ul-hora   { font-size: 12px; color: var(--sec); margin-top: 3px; }
+
+/* ============================================================
+   TELA 3: GRÁFICOS
+   ============================================================ */
+.grade-graficos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card-grafico {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda);
+  border-radius: 5px;
+  padding: 16px 18px;
+}
+
+.grafico-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--sec);
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   TELA 4: HISTÓRICO / TELA 5: SENSORES
+   ============================================================ */
+.filtro-linha {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.campo-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.campo-filtro label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--sec);
+}
+
+.campo-filtro select {
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: var(--fonte);
+  color: var(--texto);
+  background: #fff;
+  border: 1.5px solid var(--borda);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.campo-filtro select:focus { outline: none; border-color: var(--azul); }
+
+.btn-secundario {
+  background: #fff;
+  color: var(--vermelho);
+  border: 1.5px solid #e0b0b0;
+  border-radius: 4px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--fonte);
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-secundario:hover { background: var(--vermelho-bg); }
+
+.tabela-wrapper {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabela thead th {
+  background: var(--azul-esc);
+  color: #fff;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tabela tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f2f4f7;
+  vertical-align: middle;
+}
+
+.tabela tbody tr:last-child td { border-bottom: none; }
+.tabela tbody tr:hover          { background: #f7f9fc; }
+
+.sem-dados {
+  text-align: center;
+  color: var(--sec);
+  padding: 24px !important;
+}
+
+/* Badges inline nas tabelas */
+.badge-ok   { display:inline-block; background:var(--verde-bg);   color:var(--verde);   font-size:11px; font-weight:700; padding:2px 8px; border-radius:3px; }
+.badge-av   { display:inline-block; background:var(--amarelo-bg); color:var(--amarelo); font-size:11px; font-weight:700; padding:2px 8px; border-radius:3px; }
+.badge-cr   { display:inline-block; background:var(--vermelho-bg);color:var(--vermelho);font-size:11px; font-weight:700; padding:2px 8px; border-radius:3px; }
+
+.btn-remover {
+  background: #fff;
+  color: var(--vermelho);
+  border: 1px solid #e0b0b0;
+  border-radius: 3px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--fonte);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-remover:hover { background: var(--vermelho-bg); }
+
+.mb-24 { margin-bottom: 24px; }
+
+/* ============================================================
+   TELA 6: CONFIGURAÇÕES
+   ============================================================ */
+.grade-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card-config {
+  background: var(--fundo-card);
+  border: 1px solid var(--borda);
+  border-radius: 5px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.config-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--azul-esc);
+}
+
+.config-desc {
+  font-size: 12px;
+  color: var(--sec);
+  line-height: 1.5;
+}
+
+.config-linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.campo-nota {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 4px;
+  display: block;
+}
+
+.divisor {
+  border: none;
+  border-top: 1px solid var(--borda);
+}
+
+.bloco-info-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sec);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.bloco-sql {
+  background: #f4f6f9;
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #333;
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   CHATBOT FLUTUANTE
+   ============================================================ */
+#btn-chat {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  width: 46px; height: 46px;
+  background: var(--azul);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 19px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+#btn-chat:hover { background: var(--azul-esc); }
+
+#janela-chat {
+  position: fixed;
+  bottom: 76px; right: 20px;
+  width: 280px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  z-index: 300;
+  overflow: hidden;
+}
+
+.chat-header {
+  background: var(--azul);
+  color: #fff;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-fechar {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.chat-corpo { padding: 14px; }
+
+.chat-balao {
+  background: var(--fundo);
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--sec);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .painel-status { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 800px) {
+  .grade-graficos { grid-template-columns: 1fr; }
+  .grade-config   { grid-template-columns: 1fr; }
+  .config-linha   { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.aberta { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+
+  #topbar, #conteudo { margin-left: 0; }
+  #btn-menu { display: block; }
+
+  .painel-status { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .painel-status  { grid-template-columns: 1fr; }
+  #conteudo       { padding: 16px; }
+  .boas-vindas    { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .status-valor   { font-size: 30px; }
+}
