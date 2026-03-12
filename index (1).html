@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SGH – Acesso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --azul:     #1a4fa0;
+      --laranja:  #e8472a;
+      --fundo:    #f0f2f5;
+      --borda:    #cdd2db;
+      --texto:    #1c1c2e;
+      --sec:      #5a6278;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0d1b36;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 70% 50%, #1a3a6e44, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, #0a4a6e33, transparent 50%);
+      z-index: 0;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 6px;
+      padding: 40px 36px 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    }
+
+    .logo { text-align: center; margin-bottom: 28px; }
+
+    .logo-letras {
+      font-size: 44px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      line-height: 1;
+    }
+    .logo-letras .s, .logo-letras .h { color: var(--laranja); }
+    .logo-letras .g                   { color: var(--azul); }
+
+    .logo-nome {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--azul);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    .logo-empresa { font-size: 12px; color: var(--sec); margin-top: 2px; }
+
+    .campo { margin-bottom: 14px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--sec);
+      margin-bottom: 5px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 11px 13px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: var(--texto);
+      background: var(--fundo);
+      border: 1.5px solid var(--borda);
+      border-radius: 4px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    input:focus { outline: none; border-color: var(--azul); background: #fff; }
+
+    .erro {
+      background: #fde8e8;
+      border: 1px solid #f5b8b8;
+      color: #a01a1a;
+      font-size: 13px;
+      padding: 9px 12px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .btn-entrar {
+      width: 100%;
+      padding: 13px;
+      background: var(--azul);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.15s;
+    }
+    .btn-entrar:hover    { background: #112f6a; }
+    .btn-entrar:disabled { background: #9aabb8; cursor: not-allowed; }
+
+    .rodape { text-align: center; font-size: 11px; color: #bbb; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <div class="logo">
+      <div class="logo-letras">
+        <span class="s">S</span><span class="g">G</span><span class="h">H</span>
+      </div>
+      <p class="logo-nome">Sistema de Gestão Hídrica</p>
+      <p class="logo-empresa">Color &amp; Têxtil</p>
+    </div>
+
+    <form id="form">
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" placeholder="seu@colortextil.com" autofocus required />
+      </div>
+      <div class="campo">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" placeholder="Sua senha" required />
+      </div>
+      <p id="erro" class="erro"></p>
+      <button type="submit" id="btn" class="btn-entrar">Entrar</button>
+    </form>
+
+    <p class="rodape">SGH v1.0 &mdash; Color &amp; Têxtil &copy; 2025</p>
+
+  </div>
+
+  <!-- Supabase: biblioteca de conexao com o banco de dados -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // ── Conexao com o Supabase ──────────────────────────────
+    const SUPABASE_URL = 'https://huvohrqgcrgbdqwhgrro.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_YwfhEgVmZMnnpVJinn8teg_xQmasw0K';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Se ja estiver logado, vai direto para o sistema
+    sb.auth.getSession().then(({ data }) => {
+      if (data.session) window.location.href = 'principal.html';
+    });
+
+    // Quando clicar em Entrar
+    document.getElementById('form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const email  = document.getElementById('email').value.trim();
+      const senha  = document.getElementById('senha').value;
+      const erroEl = document.getElementById('erro');
+      const btn    = document.getElementById('btn');
+
+      erroEl.style.display = 'none';
+      btn.textContent = 'Entrando...';
+      btn.disabled    = true;
+
+      // Tenta fazer login no Supabase
+      const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+
+      if (error) {
+        // Login falhou
+        erroEl.textContent   = 'E-mail ou senha incorretos.';
+        erroEl.style.display = 'block';
+        btn.textContent      = 'Entrar';
+        btn.disabled         = false;
+        document.getElementById('senha').value = '';
+        document.getElementById('senha').focus();
+      } else {
+        // Login ok, vai para o sistema
+        window.location.href = 'principal.html';
+      }
+    });
+
+    // Esconde o erro enquanto digita
+    document.getElementById('form').addEventListener('input', function() {
+      document.getElementById('erro').style.display = 'none';
+    });
+  </script>
+
+</body>
+</html>

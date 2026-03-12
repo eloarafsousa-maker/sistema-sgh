@@ -4,15 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SGH – Monitoramento</title>
+
+  <!-- Icones -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Fonte -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Estilos do sistema -->
   <link rel="stylesheet" href="principal.css" />
 </head>
 <body>
 
 <!-- ============================================================
-  SIDEBAR — navegação lateral fixa
-  Ícone grande + texto curto = fácil de identificar rapidamente
+  SIDEBAR — menu lateral fixo
 ============================================================ -->
 <nav id="sidebar">
 
@@ -26,7 +29,6 @@
     </div>
   </div>
 
-  <!-- Cada item: ícone grande + label curto -->
   <ul class="menu">
     <li class="menu-item ativo" data-secao="status">
       <i class="bi bi-grid-1x2"></i>
@@ -57,9 +59,11 @@
   <div class="sidebar-rodape">
     <div class="info-usuario">
       <i class="bi bi-person-circle"></i>
-      <span>Usuário Teste</span>
+      <!-- Nome do usuario preenchido pelo JS após login -->
+      <span id="nome-usuario">Carregando...</span>
     </div>
-    <button class="btn-sair" onclick="window.location.href='index.html'">
+    <!-- Sair: encerra a sessao no Supabase e volta para o login -->
+    <button class="btn-sair" id="btn-sair">
       <i class="bi bi-box-arrow-left"></i> Sair
     </button>
   </div>
@@ -67,7 +71,7 @@
 </nav>
 
 <!-- ============================================================
-  TOPBAR — título da tela atual + botão menu (mobile)
+  TOPBAR — barra superior com título e relogio
 ============================================================ -->
 <header id="topbar">
   <button id="btn-menu"><i class="bi bi-list"></i></button>
@@ -76,19 +80,16 @@
 </header>
 
 <!-- ============================================================
-  CONTEÚDO — cada <section> é uma tela diferente
+  CONTEUDO — cada section é uma tela diferente
 ============================================================ -->
 <main id="conteudo">
 
 
-  <!-- ========================================================
+  <!-- ======================================================
     TELA 1: STATUS GERAL
-    Objetivo: o operador vê o estado de todos os parâmetros
-    de uma vez, sem precisar clicar em nada.
-  ======================================================== -->
+  ====================================================== -->
   <section id="sec-status" class="tela ativa">
 
-    <!-- Saudação com horário -->
     <div class="boas-vindas">
       <div>
         <p id="saudacao" class="saudacao"></p>
@@ -97,8 +98,6 @@
       <p id="data-hoje" class="data-hoje"></p>
     </div>
 
-    <!-- Painel de status: um card por parâmetro
-         Cor do card muda conforme o status (normal / atenção / crítico) -->
     <div class="painel-status">
 
       <div class="card-status" id="card-ph">
@@ -131,12 +130,10 @@
 
     </div>
 
-    <!-- Última atualização -->
     <p class="ultima-atualizacao" id="ultima-atualizacao">
       Nenhuma leitura registrada ainda. Use "Registrar Leitura" para inserir dados.
     </p>
 
-    <!-- Modo simulação -->
     <div class="aviso-modo">
       Modo de simulação ativo — dados inseridos manualmente.
       Futuramente os sensores ESP32 atualizarão automaticamente.
@@ -145,11 +142,9 @@
   </section>
 
 
-  <!-- ========================================================
+  <!-- ======================================================
     TELA 2: REGISTRAR LEITURA
-    Objetivo: operador insere um dado em 3 passos rápidos:
-    1. escolhe o sensor  2. digita o valor  3. clica em Registrar
-  ======================================================== -->
+  ====================================================== -->
   <section id="sec-registrar" class="tela">
 
     <div class="tela-cabecalho">
@@ -157,7 +152,6 @@
       <p>Selecione o sensor, informe o valor medido e clique em Registrar.</p>
     </div>
 
-    <!-- Formulário enxuto — 1 ação por linha -->
     <div class="form-registro">
 
       <div class="campo-grande">
@@ -181,17 +175,14 @@
                placeholder="Ex: 7.2" step="0.01" inputmode="decimal" />
       </div>
 
-      <!-- Botão grande — fácil de clicar mesmo com pressa -->
       <button onclick="registrarLeitura()" class="btn-registrar">
         Registrar
       </button>
 
-      <!-- Feedback aparece aqui logo abaixo -->
       <div id="feedback-registro" class="feedback" style="display:none;"></div>
 
     </div>
 
-    <!-- Confirmação visual da última leitura inserida -->
     <div id="ultima-leitura" class="ultima-leitura" style="display:none;">
       <p class="ul-titulo">Última leitura inserida</p>
       <p class="ul-dado" id="ul-descricao"></p>
@@ -201,9 +192,9 @@
   </section>
 
 
-  <!-- ========================================================
-    TELA 3: GRÁFICOS
-  ======================================================== -->
+  <!-- ======================================================
+    TELA 3: GRAFICOS
+  ====================================================== -->
   <section id="sec-graficos" class="tela">
 
     <div class="tela-cabecalho">
@@ -233,9 +224,9 @@
   </section>
 
 
-  <!-- ========================================================
-    TELA 4: HISTÓRICO
-  ======================================================== -->
+  <!-- ======================================================
+    TELA 4: HISTORICO
+  ====================================================== -->
   <section id="sec-historico" class="tela">
 
     <div class="tela-cabecalho">
@@ -243,7 +234,6 @@
       <p>Todas as medições registradas, da mais recente para a mais antiga.</p>
     </div>
 
-    <!-- Filtro simples -->
     <div class="filtro-linha">
       <div class="campo-filtro">
         <label for="filtro-tipo">Filtrar por tipo</label>
@@ -281,9 +271,9 @@
   </section>
 
 
-  <!-- ========================================================
+  <!-- ======================================================
     TELA 5: SENSORES
-  ======================================================== -->
+  ====================================================== -->
   <section id="sec-sensores" class="tela">
 
     <div class="tela-cabecalho">
@@ -337,9 +327,9 @@
   </section>
 
 
-  <!-- ========================================================
-    TELA 6: CONFIGURAÇÕES
-  ======================================================== -->
+  <!-- ======================================================
+    TELA 6: CONFIGURACOES
+  ====================================================== -->
   <section id="sec-config" class="tela">
 
     <div class="tela-cabecalho">
@@ -349,7 +339,6 @@
 
     <div class="grade-config">
 
-      <!-- Limites de alerta -->
       <div class="card-config">
         <h3 class="config-titulo">Limites de Alerta</h3>
         <p class="config-desc">
@@ -384,43 +373,40 @@
         <div id="feedback-config" class="feedback" style="display:none;"></div>
       </div>
 
-      <!-- Integrações futuras -->
       <div class="card-config">
-        <h3 class="config-titulo">Integrações (em breve)</h3>
-        <p class="config-desc">Estas funcionalidades serão ativadas conforme o sistema evoluir.</p>
+        <h3 class="config-titulo">Integrações</h3>
+        <p class="config-desc">Funcionalidades conectadas ao sistema.</p>
 
         <div class="campo-grande" style="margin-bottom:14px;">
           <label>URL da API — ESP32</label>
-          <input type="url" class="input-grande" placeholder="https://seuservidor.com/api" disabled />
-          <small class="campo-nota">Disponível após configuração do servidor backend.</small>
+          <!-- URL que o ESP32 usa para enviar dados -->
+          <input type="url" class="input-grande"
+            value="https://huvohrqgcrgbdqwhgrro.supabase.co/rest/v1/medicoes"
+            readonly style="font-size:12px; color:#888;" />
+          <small class="campo-nota">Esta é a URL configurada no código do ESP32.</small>
         </div>
 
         <div class="campo-grande">
           <label>Script do Chatbot — Voiceflow</label>
-          <textarea class="input-grande" rows="3"
-            placeholder="Cole o script do Voiceflow aqui quando disponível." disabled
+          <!-- Campo para colar o script gerado pelo Voiceflow -->
+          <textarea id="voiceflow-script" class="input-grande" rows="3"
+            placeholder="Cole o script do Voiceflow aqui e clique em Ativar."
             style="resize:vertical;"></textarea>
-          <small class="campo-nota">Disponível após configuração no painel do Voiceflow.</small>
+          <small class="campo-nota">Copie o script no Voiceflow em Publish > Web.</small>
         </div>
+
+        <button onclick="ativarChatbot()" class="btn-registrar" style="width:auto; padding: 11px 28px; margin-top: 4px;">
+          Ativar Chatbot
+        </button>
 
         <hr class="divisor">
 
         <div class="bloco-info">
-          <p class="bloco-info-titulo">Estrutura do Banco de Dados (MySQL)</p>
-          <pre class="bloco-sql">CREATE TABLE sensores (
-  id_sensor     INT AUTO_INCREMENT PRIMARY KEY,
-  nome_sensor   VARCHAR(100),
-  tipo_sensor   VARCHAR(50),
-  data_cadastro DATETIME
-);
-
-CREATE TABLE medicoes (
-  id_medicao  INT AUTO_INCREMENT PRIMARY KEY,
-  id_sensor   INT,
-  valor       DECIMAL(10,2),
-  data_hora   DATETIME,
-  FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor)
-);</pre>
+          <p class="bloco-info-titulo">Estrutura do Banco de Dados (Supabase)</p>
+          <pre class="bloco-sql">sensores      → id, nome_sensor, tipo_sensor, data_cadastro
+medicoes      → id_medicao, id_sensor, tipo, valor, data_hora, origem
+configuracoes → id, ph_min, ph_max, turb_max, temp_max
+perfis        → id, nome, email, cargo</pre>
         </div>
 
       </div>
@@ -431,7 +417,7 @@ CREATE TABLE medicoes (
 
 </main>
 
-<!-- Chatbot flutuante (placeholder Voiceflow) -->
+<!-- Botao flutuante do chatbot -->
 <button id="btn-chat" onclick="toggleChat()" title="Assistente">
   <i class="bi bi-chat-dots"></i>
 </button>
@@ -441,14 +427,49 @@ CREATE TABLE medicoes (
     <span>Assistente SGH</span>
     <button onclick="toggleChat()" class="chat-fechar">&times;</button>
   </div>
-  <div class="chat-corpo">
+  <div class="chat-corpo" id="chat-corpo">
     <div class="chat-balao">
-      Em breve integrado ao Voiceflow. Acesse Configurações para ativar.
+      Para ativar o assistente, acesse Configuracoes e cole o script do Voiceflow.
     </div>
   </div>
 </div>
 
+<!-- ============================================================
+  BIBLIOTECAS — carregadas no final para nao travar a pagina
+============================================================ -->
+
+<!-- Supabase: banco de dados em tempo real -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Chart.js: graficos de linha -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<!-- Logica do sistema -->
 <script src="principal.js"></script>
+
+<!-- Ativar chatbot Voiceflow -->
+<script>
+  function ativarChatbot() {
+    const script = document.getElementById('voiceflow-script').value.trim();
+    if (!script) {
+      alert('Cole o script do Voiceflow antes de ativar.');
+      return;
+    }
+    // Injeta o script do Voiceflow na pagina
+    const div = document.createElement('div');
+    div.innerHTML = script;
+    document.body.appendChild(div);
+    div.querySelectorAll('script').forEach(function(s) {
+      const novo = document.createElement('script');
+      if (s.src) novo.src = s.src;
+      else novo.textContent = s.textContent;
+      document.body.appendChild(novo);
+    });
+    document.getElementById('chat-corpo').innerHTML =
+      '<div class="chat-balao" style="color:#1a7a3a;">Chatbot ativado com sucesso!</div>';
+  }
+</script>
+
+
 </body>
 </html>
