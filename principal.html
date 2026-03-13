@@ -3,22 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SGH – Monitoramento</title>
-
-  <!-- Icones -->
+  <title>SGH – Sistema de Gestão Hídrica</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Fonte -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Estilos do sistema -->
   <link rel="stylesheet" href="principal.css" />
 </head>
 <body>
 
-<!-- ============================================================
-  SIDEBAR — menu lateral fixo
-============================================================ -->
+<!-- SIDEBAR -->
 <nav id="sidebar">
-
   <div class="sidebar-topo">
     <div class="logo-mini">
       <span class="s">S</span><span class="g">G</span><span class="h">H</span>
@@ -31,132 +24,143 @@
 
   <ul class="menu">
     <li class="menu-item ativo" data-secao="status">
-      <i class="bi bi-grid-1x2"></i>
-      <span>Status Geral</span>
+      <i class="bi bi-grid-1x2"></i><span>Status Geral</span>
     </li>
     <li class="menu-item" data-secao="registrar">
-      <i class="bi bi-plus-circle"></i>
-      <span>Registrar Leitura</span>
+      <i class="bi bi-plus-circle"></i><span>Registrar Leitura</span>
     </li>
     <li class="menu-item" data-secao="graficos">
-      <i class="bi bi-bar-chart-line"></i>
-      <span>Gráficos</span>
+      <i class="bi bi-bar-chart-line"></i><span>Gráficos</span>
     </li>
     <li class="menu-item" data-secao="historico">
-      <i class="bi bi-list-ul"></i>
-      <span>Histórico</span>
+      <i class="bi bi-list-ul"></i><span>Histórico</span>
     </li>
     <li class="menu-item" data-secao="sensores">
-      <i class="bi bi-cpu"></i>
-      <span>Sensores</span>
+      <i class="bi bi-cpu"></i><span>Sensores</span>
     </li>
     <li class="menu-item" data-secao="config">
-      <i class="bi bi-sliders"></i>
-      <span>Configurações</span>
+      <i class="bi bi-sliders"></i><span>Configurações</span>
     </li>
   </ul>
 
   <div class="sidebar-rodape">
     <div class="info-usuario">
       <i class="bi bi-person-circle"></i>
-      <!-- Nome do usuario preenchido pelo JS após login -->
       <span id="nome-usuario">Carregando...</span>
     </div>
-    <!-- Sair: encerra a sessao no Supabase e volta para o login -->
     <button class="btn-sair" id="btn-sair">
       <i class="bi bi-box-arrow-left"></i> Sair
     </button>
   </div>
-
 </nav>
 
-<!-- ============================================================
-  TOPBAR — barra superior com título e relogio
-============================================================ -->
+<!-- TOPBAR -->
 <header id="topbar">
   <button id="btn-menu"><i class="bi bi-list"></i></button>
   <span id="titulo-tela">Status Geral</span>
-  <span id="relogio" class="relogio"></span>
+  <div class="topbar-direita">
+    <span id="status-db" class="db-status conectando">
+      <i class="bi bi-cloud"></i> Conectando...
+    </span>
+    <span id="relogio" class="relogio"></span>
+  </div>
 </header>
 
-<!-- ============================================================
-  CONTEUDO — cada section é uma tela diferente
-============================================================ -->
 <main id="conteudo">
 
-
-  <!-- ======================================================
-    TELA 1: STATUS GERAL
-  ====================================================== -->
+  <!-- ====================================================
+    TELA: STATUS GERAL
+    Mostra o último valor de cada parâmetro.
+    Carregado direto do banco ao abrir o sistema.
+  ==================================================== -->
   <section id="sec-status" class="tela ativa">
 
     <div class="boas-vindas">
       <div>
         <p id="saudacao" class="saudacao"></p>
-        <p class="saudacao-sub">Acompanhe o status atual do monitoramento hídrico.</p>
+        <p class="saudacao-sub">Status atual do monitoramento hídrico.</p>
       </div>
       <p id="data-hoje" class="data-hoje"></p>
     </div>
 
     <div class="painel-status">
-
       <div class="card-status" id="card-ph">
         <p class="status-param">pH da Água</p>
-        <p class="status-valor" id="val-ph">7.2</p>
+        <p class="status-valor" id="val-ph">—</p>
         <p class="status-limite" id="lim-ph">Faixa: 6.5 — 8.5</p>
-        <div class="status-badge" id="badge-ph">Normal</div>
+        <div class="status-badge" id="badge-ph">Aguardando</div>
       </div>
-
       <div class="card-status" id="card-turbidez">
         <p class="status-param">Turbidez</p>
-        <p class="status-valor" id="val-turbidez">4.8 <small>NTU</small></p>
+        <p class="status-valor" id="val-turbidez">— <small>NTU</small></p>
         <p class="status-limite" id="lim-turbidez">Limite: até 5.0 NTU</p>
-        <div class="status-badge" id="badge-turbidez">Atenção</div>
+        <div class="status-badge" id="badge-turbidez">Aguardando</div>
       </div>
-
       <div class="card-status" id="card-temperatura">
         <p class="status-param">Temperatura</p>
-        <p class="status-valor" id="val-temperatura">28.5 <small>°C</small></p>
+        <p class="status-valor" id="val-temperatura">— <small>°C</small></p>
         <p class="status-limite" id="lim-temperatura">Limite: até 30.0 °C</p>
-        <div class="status-badge" id="badge-temperatura">Normal</div>
+        <div class="status-badge" id="badge-temperatura">Aguardando</div>
       </div>
-
       <div class="card-status" id="card-nivel">
         <p class="status-param">Nível do Reservatório</p>
-        <p class="status-valor" id="val-nivel">72 <small>%</small></p>
+        <p class="status-valor" id="val-nivel">— <small>%</small></p>
         <p class="status-limite" id="lim-nivel">Faixa: 20 — 100%</p>
-        <div class="status-badge" id="badge-nivel">Normal</div>
+        <div class="status-badge" id="badge-nivel">Aguardando</div>
       </div>
+    </div>
 
+    <!-- Resumo de totais do banco -->
+    <div class="painel-resumo">
+      <div class="card-resumo-mini">
+        <p class="resumo-num" id="total-leituras">—</p>
+        <p class="resumo-desc">Leituras no banco</p>
+      </div>
+      <div class="card-resumo-mini">
+        <p class="resumo-num" id="total-sensores">—</p>
+        <p class="resumo-desc">Sensores cadastrados</p>
+      </div>
+      <div class="card-resumo-mini">
+        <p class="resumo-num" id="total-alertas">—</p>
+        <p class="resumo-desc">Alertas registrados</p>
+      </div>
+      <div class="card-resumo-mini">
+        <p class="resumo-num" id="ultima-leitura-hora">—</p>
+        <p class="resumo-desc">Última leitura</p>
+      </div>
     </div>
 
     <p class="ultima-atualizacao" id="ultima-atualizacao">
-      Nenhuma leitura registrada ainda. Use "Registrar Leitura" para inserir dados.
+      Nenhuma leitura registrada ainda.
     </p>
 
     <div class="aviso-modo">
-      Modo de simulação ativo — dados inseridos manualmente.
-      Futuramente os sensores ESP32 atualizarão automaticamente.
+      Dados salvos no Supabase (PostgreSQL).
+      As leituras do ESP32 são inseridas manualmente nesta tela.
     </div>
 
   </section>
 
 
-  <!-- ======================================================
-    TELA 2: REGISTRAR LEITURA
-  ====================================================== -->
+  <!-- ====================================================
+    TELA: REGISTRAR LEITURA
+    Operador insere os dados lidos no ESP32 manualmente.
+    Salvo na tabela "medicoes". Alertas registrados automaticamente.
+  ==================================================== -->
   <section id="sec-registrar" class="tela">
 
     <div class="tela-cabecalho">
       <h2>Registrar Leitura</h2>
-      <p>Selecione o sensor, informe o valor medido e clique em Registrar.</p>
+      <p>Insira os dados lidos no ESP32. Todos os campos são salvos no banco.</p>
     </div>
 
     <div class="form-registro">
 
       <div class="campo-grande">
         <label for="reg-sensor">Sensor</label>
-        <select id="reg-sensor" class="select-grande"></select>
+        <select id="reg-sensor" class="select-grande">
+          <option value="">Carregando sensores...</option>
+        </select>
       </div>
 
       <div class="campo-grande">
@@ -175,7 +179,14 @@
                placeholder="Ex: 7.2" step="0.01" inputmode="decimal" />
       </div>
 
-      <button onclick="registrarLeitura()" class="btn-registrar">
+      <!-- Campo de observação — salvo junto com a leitura no banco -->
+      <div class="campo-grande">
+        <label for="reg-obs">Observação (opcional)</label>
+        <input type="text" id="reg-obs" class="input-grande"
+               placeholder="Ex: Leitura após troca de filtro" maxlength="200" />
+      </div>
+
+      <button onclick="registrarLeitura()" class="btn-registrar" id="btn-registrar">
         Registrar
       </button>
 
@@ -183,8 +194,8 @@
 
     </div>
 
-    <div id="ultima-leitura" class="ultima-leitura" style="display:none;">
-      <p class="ul-titulo">Última leitura inserida</p>
+    <div id="box-ultima-leitura" class="ultima-leitura" style="display:none;">
+      <p class="ul-titulo">Última leitura registrada</p>
       <p class="ul-dado" id="ul-descricao"></p>
       <p class="ul-hora" id="ul-hora"></p>
     </div>
@@ -192,14 +203,38 @@
   </section>
 
 
-  <!-- ======================================================
-    TELA 3: GRAFICOS
-  ====================================================== -->
+  <!-- ====================================================
+    TELA: GRÁFICOS
+    Carrega dados históricos do banco para cada parâmetro.
+    Filtro por período para ver dados antigos.
+  ==================================================== -->
   <section id="sec-graficos" class="tela">
 
     <div class="tela-cabecalho">
       <h2>Gráficos de Monitoramento</h2>
-      <p>Evolução dos valores ao longo do tempo.</p>
+      <p>Evolução dos valores registrados no banco.</p>
+    </div>
+
+    <!-- Filtro de período para os gráficos -->
+    <div class="filtro-linha" style="margin-bottom:20px;">
+      <div class="campo-filtro">
+        <label>Período</label>
+        <select id="graf-periodo" onchange="carregarGraficos()">
+          <option value="24h">Últimas 24 horas</option>
+          <option value="7d" selected>Últimos 7 dias</option>
+          <option value="30d">Últimos 30 dias</option>
+          <option value="tudo">Tudo</option>
+        </select>
+      </div>
+      <div class="campo-filtro">
+        <label>Sensor</label>
+        <select id="graf-sensor" onchange="carregarGraficos()">
+          <option value="">Todos os sensores</option>
+        </select>
+      </div>
+      <button class="btn-secundario" onclick="carregarGraficos()">
+        <i class="bi bi-arrow-clockwise"></i> Atualizar
+      </button>
     </div>
 
     <div class="grade-graficos">
@@ -224,30 +259,90 @@
   </section>
 
 
-  <!-- ======================================================
-    TELA 4: HISTORICO
-  ====================================================== -->
+  <!-- ====================================================
+    TELA: HISTÓRICO
+    Filtros múltiplos: tipo, sensor, data início, data fim.
+    Acessa qualquer dado antigo do banco.
+  ==================================================== -->
   <section id="sec-historico" class="tela">
 
     <div class="tela-cabecalho">
       <h2>Histórico de Leituras</h2>
-      <p>Todas as medições registradas, da mais recente para a mais antiga.</p>
+      <p>Filtre por qualquer combinação de critérios para acessar dados antigos.</p>
     </div>
 
-    <div class="filtro-linha">
-      <div class="campo-filtro">
-        <label for="filtro-tipo">Filtrar por tipo</label>
-        <select id="filtro-tipo" onchange="renderHistorico()">
-          <option value="">Todos os tipos</option>
-          <option value="ph">pH</option>
-          <option value="turbidez">Turbidez</option>
-          <option value="temperatura">Temperatura</option>
-          <option value="nivel">Nível</option>
-        </select>
+    <!-- Painel de filtros -->
+    <div class="card-form mb-16">
+      <p class="form-titulo">Filtros</p>
+      <div class="filtros-grade">
+
+        <div class="campo-filtro">
+          <label for="hist-tipo">Tipo de Medição</label>
+          <select id="hist-tipo">
+            <option value="">Todos</option>
+            <option value="ph">pH</option>
+            <option value="turbidez">Turbidez</option>
+            <option value="temperatura">Temperatura</option>
+            <option value="nivel">Nível</option>
+          </select>
+        </div>
+
+        <div class="campo-filtro">
+          <label for="hist-sensor">Sensor</label>
+          <select id="hist-sensor">
+            <option value="">Todos</option>
+          </select>
+        </div>
+
+        <div class="campo-filtro">
+          <label for="hist-data-ini">Data Início</label>
+          <input type="date" id="hist-data-ini" />
+        </div>
+
+        <div class="campo-filtro">
+          <label for="hist-data-fim">Data Fim</label>
+          <input type="date" id="hist-data-fim" />
+        </div>
+
+        <div class="campo-filtro">
+          <label for="hist-status">Status</label>
+          <select id="hist-status">
+            <option value="">Todos</option>
+            <option value="ok">Normal</option>
+            <option value="atencao">Atenção</option>
+            <option value="critico">Crítico</option>
+          </select>
+        </div>
+
+        <div class="campo-filtro">
+          <label for="hist-limit">Exibir</label>
+          <select id="hist-limit">
+            <option value="50">50 registros</option>
+            <option value="100">100 registros</option>
+            <option value="500">500 registros</option>
+            <option value="0">Todos</option>
+          </select>
+        </div>
+
       </div>
-      <button class="btn-secundario" onclick="limparHistorico()">
-        Limpar Histórico
-      </button>
+
+      <div class="filtros-acoes">
+        <button class="btn-registrar" style="width:auto;padding:10px 24px;" onclick="carregarHistorico()">
+          Buscar
+        </button>
+        <button class="btn-secundario" onclick="limparFiltros()">
+          Limpar Filtros
+        </button>
+        <button class="btn-secundario" onclick="exportarCSV()">
+          <i class="bi bi-download"></i> Exportar CSV
+        </button>
+        <button class="btn-secundario vermelho" onclick="limparHistorico()">
+          Limpar Histórico
+        </button>
+      </div>
+
+      <!-- Contador de resultados -->
+      <p id="contador-resultados" class="contador-res" style="display:none;"></p>
     </div>
 
     <div class="tabela-wrapper">
@@ -259,11 +354,12 @@
             <th>Tipo</th>
             <th>Valor</th>
             <th>Status</th>
+            <th>Observação</th>
             <th>Data / Hora</th>
           </tr>
         </thead>
         <tbody id="tbody-historico">
-          <tr><td colspan="6" class="sem-dados">Nenhum dado registrado ainda.</td></tr>
+          <tr><td colspan="7" class="sem-dados">Use os filtros acima para buscar dados.</td></tr>
         </tbody>
       </table>
     </div>
@@ -271,14 +367,15 @@
   </section>
 
 
-  <!-- ======================================================
-    TELA 5: SENSORES
-  ====================================================== -->
+  <!-- ====================================================
+    TELA: SENSORES
+    Cadastro salvo no banco. Permite editar o nome.
+  ==================================================== -->
   <section id="sec-sensores" class="tela">
 
     <div class="tela-cabecalho">
       <h2>Sensores Cadastrados</h2>
-      <p>Adicione ou remova os sensores utilizados no monitoramento.</p>
+      <p>Sensores salvos no banco — aparecem em todo o sistema automaticamente.</p>
     </div>
 
     <div class="form-registro mb-24">
@@ -286,7 +383,7 @@
       <div class="campo-grande">
         <label for="sen-nome">Nome do Sensor</label>
         <input type="text" id="sen-nome" class="input-grande"
-               placeholder="Ex: Sensor 1 - Entrada" maxlength="50" />
+               placeholder="Ex: Sensor 1 - Entrada" maxlength="80" />
       </div>
 
       <div class="campo-grande">
@@ -297,6 +394,12 @@
           <option value="temperatura">Temperatura</option>
           <option value="nivel">Nível do Reservatório</option>
         </select>
+      </div>
+
+      <div class="campo-grande">
+        <label for="sen-local">Localização</label>
+        <input type="text" id="sen-local" class="input-grande"
+               placeholder="Ex: Reservatório principal" maxlength="100" />
       </div>
 
       <button onclick="salvarSensor()" class="btn-registrar">
@@ -311,15 +414,16 @@
       <table class="tabela">
         <thead>
           <tr>
-            <th>ID</th>
             <th>Nome</th>
             <th>Tipo</th>
+            <th>Localização</th>
+            <th>Total de Leituras</th>
             <th>Cadastrado em</th>
             <th>Remover</th>
           </tr>
         </thead>
         <tbody id="tbody-sensores">
-          <tr><td colspan="5" class="sem-dados">Nenhum sensor cadastrado.</td></tr>
+          <tr><td colspan="6" class="sem-dados">Carregando sensores...</td></tr>
         </tbody>
       </table>
     </div>
@@ -327,22 +431,25 @@
   </section>
 
 
-  <!-- ======================================================
-    TELA 6: CONFIGURACOES
-  ====================================================== -->
+  <!-- ====================================================
+    TELA: CONFIGURAÇÕES
+    Limites, integrações futuras e script SQL do banco.
+  ==================================================== -->
   <section id="sec-config" class="tela">
 
     <div class="tela-cabecalho">
       <h2>Configurações</h2>
-      <p>Defina os limites de alerta para cada parâmetro monitorado.</p>
+      <p>Limites e preferências do sistema, salvos no banco de dados.</p>
     </div>
 
     <div class="grade-config">
 
+      <!-- Limites de alerta -->
       <div class="card-config">
         <h3 class="config-titulo">Limites de Alerta</h3>
         <p class="config-desc">
-          Valores fora desses limites aparecem como "Atenção" ou "Critico" no painel.
+          Quando um valor ultrapassar estes limites, o sistema registra um alerta
+          e exibe "Atenção" ou "Crítico" no painel.
         </p>
 
         <div class="config-linha">
@@ -355,7 +462,6 @@
             <input type="number" id="cfg-ph-max" value="8.5" step="0.1" class="input-grande" />
           </div>
         </div>
-
         <div class="config-linha">
           <div class="campo-grande">
             <label>Turbidez Máx. (NTU)</label>
@@ -367,48 +473,93 @@
           </div>
         </div>
 
-        <button onclick="salvarConfig()" class="btn-registrar" style="width:auto; padding: 11px 28px;">
+        <button onclick="salvarConfig()" class="btn-registrar" style="width:auto;padding:11px 32px;">
           Salvar
         </button>
         <div id="feedback-config" class="feedback" style="display:none;"></div>
       </div>
 
+      <!-- Integrações futuras -->
       <div class="card-config">
-        <h3 class="config-titulo">Integrações</h3>
-        <p class="config-desc">Funcionalidades conectadas ao sistema.</p>
+        <h3 class="config-titulo">Integrações Futuras</h3>
 
         <div class="campo-grande" style="margin-bottom:14px;">
           <label>URL da API — ESP32</label>
-          <!-- URL que o ESP32 usa para enviar dados -->
           <input type="url" class="input-grande"
-            value="https://huvohrqgcrgbdqwhgrro.supabase.co/rest/v1/medicoes"
-            readonly style="font-size:12px; color:#888;" />
-          <small class="campo-nota">Esta é a URL configurada no código do ESP32.</small>
+                 placeholder="https://seuservidor.com/api" disabled />
+          <small class="campo-nota">Disponível após configuração do servidor backend.</small>
         </div>
 
         <div class="campo-grande">
           <label>Script do Chatbot — Voiceflow</label>
-          <!-- Campo para colar o script gerado pelo Voiceflow -->
-          <textarea id="voiceflow-script" class="input-grande" rows="3"
-            placeholder="Cole o script do Voiceflow aqui e clique em Ativar."
-            style="resize:vertical;"></textarea>
-          <small class="campo-nota">Copie o script no Voiceflow em Publish > Web.</small>
+          <textarea class="input-grande" rows="3"
+            placeholder="Cole o script do Voiceflow aqui quando disponível."
+            disabled style="resize:vertical;"></textarea>
+          <small class="campo-nota">Disponível após configuração no painel Voiceflow.</small>
         </div>
+      </div>
 
-        <button onclick="ativarChatbot()" class="btn-registrar" style="width:auto; padding: 11px 28px; margin-top: 4px;">
-          Ativar Chatbot
-        </button>
+      <!-- Script SQL completo -->
+      <div class="card-config" style="grid-column: 1 / -1;">
+        <h3 class="config-titulo">Script SQL — Criar Tabelas no Supabase</h3>
+        <p class="config-desc">
+          Cole este script no <strong>SQL Editor</strong> do Supabase e clique em <strong>Run</strong>.
+          Execute apenas uma vez. Se as tabelas já existirem, ignore.
+        </p>
+        <pre class="bloco-sql">-- ============================================
+-- SGH · Script de criação das tabelas
+-- Cole no SQL Editor do Supabase e clique Run
+-- ============================================
 
-        <hr class="divisor">
+-- Tabela de sensores
+CREATE TABLE IF NOT EXISTS sensores (
+  id          SERIAL PRIMARY KEY,
+  nome_sensor TEXT        NOT NULL,
+  tipo_sensor TEXT        NOT NULL,
+  localizacao TEXT        DEFAULT '',
+  ativo       BOOLEAN     DEFAULT TRUE,
+  criado_em   TIMESTAMPTZ DEFAULT NOW()
+);
 
-        <div class="bloco-info">
-          <p class="bloco-info-titulo">Estrutura do Banco de Dados (Supabase)</p>
-          <pre class="bloco-sql">sensores      → id, nome_sensor, tipo_sensor, data_cadastro
-medicoes      → id_medicao, id_sensor, tipo, valor, data_hora, origem
-configuracoes → id, ph_min, ph_max, turb_max, temp_max
-perfis        → id, nome, email, cargo</pre>
-        </div>
+-- Tabela de medições (todas as leituras registradas)
+CREATE TABLE IF NOT EXISTS medicoes (
+  id          SERIAL PRIMARY KEY,
+  id_sensor   INT         REFERENCES sensores(id) ON DELETE SET NULL,
+  nome_sensor TEXT,
+  tipo        TEXT        NOT NULL,
+  valor       NUMERIC(10,2) NOT NULL,
+  unidade     TEXT        DEFAULT '',
+  status      TEXT        DEFAULT 'ok',   -- 'ok', 'atencao', 'critico'
+  observacao  TEXT        DEFAULT '',
+  data_hora   TEXT,
+  criado_em   TIMESTAMPTZ DEFAULT NOW()
+);
 
+-- Índices para acelerar os filtros do histórico
+CREATE INDEX IF NOT EXISTS idx_medicoes_tipo      ON medicoes(tipo);
+CREATE INDEX IF NOT EXISTS idx_medicoes_sensor    ON medicoes(id_sensor);
+CREATE INDEX IF NOT EXISTS idx_medicoes_status    ON medicoes(status);
+CREATE INDEX IF NOT EXISTS idx_medicoes_criado_em ON medicoes(criado_em DESC);
+
+-- Tabela de alertas (registrada automaticamente ao detectar fora do limite)
+CREATE TABLE IF NOT EXISTS alertas (
+  id          SERIAL PRIMARY KEY,
+  id_sensor   INT         REFERENCES sensores(id) ON DELETE SET NULL,
+  nome_sensor TEXT,
+  tipo        TEXT        NOT NULL,
+  valor       NUMERIC(10,2),
+  nivel       TEXT        NOT NULL,        -- 'atencao' ou 'critico'
+  mensagem    TEXT,
+  resolvido   BOOLEAN     DEFAULT FALSE,
+  criado_em   TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabela de configurações (limites e preferências)
+CREATE TABLE IF NOT EXISTS configuracoes (
+  chave     TEXT PRIMARY KEY,
+  valor     JSONB,
+  criado_em TIMESTAMPTZ DEFAULT NOW()
+);</pre>
       </div>
 
     </div>
@@ -417,59 +568,65 @@ perfis        → id, nome, email, cargo</pre>
 
 </main>
 
-<!-- Botao flutuante do chatbot -->
+<!-- Chatbot flutuante (placeholder Voiceflow) -->
 <button id="btn-chat" onclick="toggleChat()" title="Assistente">
   <i class="bi bi-chat-dots"></i>
 </button>
-
 <div id="janela-chat" style="display:none;">
   <div class="chat-header">
     <span>Assistente SGH</span>
     <button onclick="toggleChat()" class="chat-fechar">&times;</button>
   </div>
-  <div class="chat-corpo" id="chat-corpo">
+  <div class="chat-corpo">
     <div class="chat-balao">
-      Para ativar o assistente, acesse Configuracoes e cole o script do Voiceflow.
+      Em breve integrado ao Voiceflow.
+      Acesse Configurações para ativar.
     </div>
   </div>
 </div>
 
-<!-- ============================================================
-  BIBLIOTECAS — carregadas no final para nao travar a pagina
-============================================================ -->
-
-<!-- Supabase: banco de dados em tempo real -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Chart.js: graficos de linha -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
-<!-- Logica do sistema -->
-<script src="principal.js"></script>
-
-<!-- Ativar chatbot Voiceflow -->
 <script>
-  function ativarChatbot() {
-    const script = document.getElementById('voiceflow-script').value.trim();
-    if (!script) {
-      alert('Cole o script do Voiceflow antes de ativar.');
-      return;
+  // Verifica sessao ativa no Supabase — se nao houver, redireciona para login
+  const SUPA_URL = 'https://huvohrqgcrgbdqwhgrro.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1dm9ocnFnY3JnYmRxd2hncnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTQ0NDEsImV4cCI6MjA4ODg5MDQ0MX0.1mNShzvzSPfljGKGVwMvDmY6_aiDxeaaHXVZ5K9i6oM';
+  const _authDb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  (async function verificarLogin() {
+    try {
+      const { data } = await _authDb.auth.getSession();
+      if (!data || !data.session) {
+        // Sem sessao — volta para o login
+        window.location.replace('index.html');
+        return;
+      }
+      // Preenche o nome do usuario na sidebar
+      const email = data.session.user.email || '';
+      const elNome = document.getElementById('nome-usuario');
+      if (elNome) elNome.textContent = email.split('@')[0];
+    } catch(e) {
+      // Erro de rede ou SDK — deixa o sistema carregar mesmo assim
+      console.warn('Erro ao verificar sessao:', e.message);
     }
-    // Injeta o script do Voiceflow na pagina
-    const div = document.createElement('div');
-    div.innerHTML = script;
-    document.body.appendChild(div);
-    div.querySelectorAll('script').forEach(function(s) {
-      const novo = document.createElement('script');
-      if (s.src) novo.src = s.src;
-      else novo.textContent = s.textContent;
-      document.body.appendChild(novo);
-    });
-    document.getElementById('chat-corpo').innerHTML =
-      '<div class="chat-balao" style="color:#1a7a3a;">Chatbot ativado com sucesso!</div>';
-  }
+  })();
+
+  // Botao Sair — encerra sessao e volta para o login
+  document.addEventListener('DOMContentLoaded', function() {
+    const btnSair = document.getElementById('btn-sair');
+    if (btnSair) {
+      btnSair.addEventListener('click', async function() {
+        await _authDb.auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+      });
+    }
+  });
 </script>
 
+<script src="principal.js"></script>
 
 </body>
 </html>
