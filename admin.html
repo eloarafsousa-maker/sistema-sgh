@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SGH – Administrador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="admin.css">
+  <style>
+
+    /* ── Variáveis globais ── */
+    :root {
+      --azul:      #1a4fa0;
+      --azul-esc:  #112f6a;
+      --laranja:   #e8472a;
+      --fundo:     #f0f2f5;
+      --borda:     #dde1e9;
+      --texto:     #1c1c2e;
+      --sec:       #5a6278;
+      --verde:     #1a7a3a;
+      --sidebar-w: 220px;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ══════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════ */
+    #sidebar {
+      width: var(--sidebar-w);
+      background: #0d1b36;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+    }
+
+    /* Topo da sidebar com logo */
+    .sb-topo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .sb-logo {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      line-height: 1;
+    }
+    .sb-logo .s, .sb-logo .h { color: var(--laranja); }
+    .sb-logo .g               { color: #4a8fe8; }
+    .sb-subtitulo {
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Badge de cargo do usuário logado */
+    .sb-cargo {
+      margin: 12px 20px 0;
+      padding: 5px 10px;
+      background: rgba(232,71,42,0.15);
+      border: 1px solid rgba(232,71,42,0.3);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--laranja);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Menu de navegação */
+    .sb-menu {
+      list-style: none;
+      padding: 16px 0;
+      flex: 1;
+    }
+
+    .sb-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: rgba(255,255,255,0.55);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .sb-menu li a:hover {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.9);
+    }
+    /* Item ativo no menu */
+    .sb-menu li a.ativo {
+      color: #fff;
+      background: rgba(74,143,232,0.12);
+      border-left-color: #4a8fe8;
+    }
+    .sb-menu li a i { font-size: 15px; }
+
+    /* Separador de seção no menu */
+    .sb-secao {
+      padding: 12px 20px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Rodapé da sidebar com nome e botão sair */
+    .sb-rodape {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .sb-usuario {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-sair {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(232,71,42,0.1);
+      border: 1px solid rgba(232,71,42,0.25);
+      border-radius: 4px;
+      color: var(--laranja);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-sair:hover { background: rgba(232,71,42,0.2); }
+
+    /* ══════════════════════════════════════
+       CONTEÚDO PRINCIPAL
+    ══════════════════════════════════════ */
+    #conteudo {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Topbar */
+    #topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--borda);
+      padding: 0 28px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-titulo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--texto);
+    }
+    .topbar-dir {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--sec);
+    }
+
+    /* Área das seções */
+    #area {
+      padding: 28px;
+      flex: 1;
+    }
+
+    /* Cada tela é uma section — só a ativa é exibida */
+    .tela { display: none; }
+    .tela.ativa { display: block; }
+
+    /* ── Cabeçalho interno das telas ── */
+    .tela-cab {
+      margin-bottom: 24px;
+    }
+    .tela-cab h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--texto);
+    }
+    .tela-cab p {
+      font-size: 13px;
+      color: var(--sec);
+      margin-top: 3px;
+    }
+
+    /* ── Cards de resumo (dashboard) ── */
+    .grade-resumo {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .card-resumo {
+      background: #fff;
+      border: 1px solid var(--borda);
+      border-radius: 6px;
+      padding: 20px;
+    }
+    .cr-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sec);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .cr-valor {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--texto);
+      margin: 6px 0 2px;
+    }
+    .cr-sub { font-size: 12px; color: var(--sec); }
+
+    /* ── Formulários ── */
+    .card-form {
+      background: #fff;
+      border: 1px solid var(--borda);
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .card-form h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--borda);
+    }
+
+    /* Grade de campos lado a lado */
+    .grade-campos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .grade-campos.tres { grid-template-columns: 1fr 1fr 1fr; }
+    .grade-campos.um   { grid-template-columns: 1fr; }
+
+    .campo { margin-bottom: 14px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--sec);
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 9px 11px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: var(--texto);
+      background: var(--fundo);
+      border: 1.5px solid var(--borda);
+      border-radius: 4px;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--azul);
+      background: #fff;
+    }
+    textarea { resize: vertical; min-height: 90px; }
+    .campo-nota {
+      font-size: 11px;
+      color: var(--sec);
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* ── Botões ── */
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primario  { background: var(--azul);   color: #fff; }
+    .btn-primario:hover  { background: var(--azul-esc); }
+    .btn-perigo    { background: #fde8e8; color: #a01a1a; border: 1px solid #f5b8b8; }
+    .btn-perigo:hover    { background: #fbd0d0; }
+    .btn-secundario { background: var(--fundo); color: var(--texto); border: 1px solid var(--borda); }
+    .btn-secundario:hover { background: #e4e7ed; }
+
+    /* ── Tabelas ── */
+    .tabela-wrap {
+      background: #fff;
+      border: 1px solid var(--borda);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      background: var(--fundo);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sec);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--borda);
+    }
+    tbody td {
+      padding: 11px 14px;
+      border-bottom: 1px solid #f0f2f5;
+      color: var(--texto);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #fafbfc; }
+    .sem-dados { text-align: center; color: var(--sec); padding: 32px !important; }
+
+    /* ── Badges de status ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge-operador      { background: #e8f5ec; color: #0f4d25; }
+    .badge-supervisor    { background: #eef0fd; color: #2a3580; }
+    .badge-administrador { background: #fff3e8; color: #7a2010; }
+    .badge-ativo   { background: #e8f5ec; color: #0f4d25; }
+    .badge-inativo { background: #f5f5f5; color: #888; }
+
+    /* ── Mensagens de feedback ── */
+    .feedback {
+      padding: 9px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+    .feedback.sucesso { background: #e8f5ec; border: 1px solid #a8d5b5; color: var(--verde); }
+    .feedback.erro    { background: #fde8e8; border: 1px solid #f5b8b8; color: #a01a1a; }
+
+    /* ── Linha de filtro / ação acima de tabelas ── */
+    .barra-acao {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+    .barra-acao input[type="text"] {
+      max-width: 260px;
+      padding: 8px 11px;
+      font-size: 13px;
+    }
+
+    /* ── Bloco SQL / código ── */
+    .bloco-codigo {
+      background: #0d1b36;
+      color: #a8d5b5;
+      border-radius: 4px;
+      padding: 14px 16px;
+      font-size: 12px;
+      font-family: monospace;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+
+    /* ── Responsivo básico ── */
+    @media (max-width: 768px) {
+      #sidebar { display: none; }
+      #conteudo { margin-left: 0; }
+      .grade-campos, .grade-campos.tres { grid-template-columns: 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<nav id="sidebar">
+
+  <div class="sb-topo">
+    <div class="sb-logo">
+      <span class="s">S</span><span class="g">G</span><span class="h">H</span>
+    </div>
+    <div class="sb-subtitulo">Gestão Hídrica</div>
+  </div>
+
+  <!-- Badge mostrando o cargo -->
+  <div class="sb-cargo">Administrador</div>
+
+  <ul class="sb-menu">
+
+    <li class="sb-secao">Painel</li>
+    <li><a href="#" class="ativo" onclick="irPara('dashboard', this)">
+      <i class="bi bi-grid-1x2"></i> Visão Geral
+    </a></li>
+
+    <li class="sb-secao">Gestão</li>
+    <li><a href="#" onclick="irPara('usuarios', this)">
+      <i class="bi bi-people"></i> Usuários
+    </a></li>
+    <li><a href="#" onclick="irPara('sensores', this)">
+      <i class="bi bi-cpu"></i> Sensores
+    </a></li>
+    <li><a href="#" onclick="irPara('templates', this)">
+      <i class="bi bi-file-earmark-text"></i> Templates de Doc.
+    </a></li>
+
+    <li class="sb-secao">Sistema</li>
+    <li><a href="#" onclick="irPara('configuracoes', this)">
+      <i class="bi bi-sliders"></i> Configurações
+    </a></li>
+    <li><a href="#" onclick="irPara('relatorios', this)">
+      <i class="bi bi-bar-chart-line"></i> Relatórios
+    </a></li>
+    <li><a href="#" onclick="irPara('integracoes', this)">
+      <i class="bi bi-plug"></i> Integrações
+    </a></li>
+
+  </ul>
+
+  <div class="sb-rodape">
+    <!-- Nome do admin logado -->
+    <div class="sb-usuario" id="sb-usuario">Carregando...</div>
+    <button class="btn-sair" onclick="sair()">
+      <i class="bi bi-box-arrow-left"></i> Sair
+    </button>
+  </div>
+
+</nav>
+
+<!-- ══════════════════════════════════════
+     CONTEÚDO
+══════════════════════════════════════ -->
+<div id="conteudo">
+
+  <!-- Topbar -->
+  <div id="topbar">
+    <span class="topbar-titulo" id="topbar-titulo">Visão Geral</span>
+    <div class="topbar-dir">
+      <span id="topbar-data"></span>
+    </div>
+  </div>
+
+  <div id="area">
+
+    <!-- ══════════════════════
+         TELA: DASHBOARD
+    ══════════════════════ -->
+    <section class="tela ativa" id="tela-dashboard">
+
+      <div class="tela-cab">
+        <h2 id="saudacao-admin">Bom dia, Admin</h2>
+        <p>Resumo geral do sistema.</p>
+      </div>
+
+      <!-- Cards de resumo -->
+      <div class="grade-resumo">
+        <div class="card-resumo">
+          <div class="cr-label">Usuarios</div>
+          <div class="cr-valor" id="res-usuarios">—</div>
+          <div class="cr-sub">cadastrados</div>
+        </div>
+        <div class="card-resumo">
+          <div class="cr-label">Sensores</div>
+          <div class="cr-valor" id="res-sensores">—</div>
+          <div class="cr-sub">ativos</div>
+        </div>
+        <div class="card-resumo">
+          <div class="cr-label">Medicoes hoje</div>
+          <div class="cr-valor" id="res-medicoes">—</div>
+          <div class="cr-sub">registradas</div>
+        </div>
+        <div class="card-resumo">
+          <div class="cr-label">Alertas</div>
+          <div class="cr-valor" id="res-alertas">—</div>
+          <div class="cr-sub">nao lidos</div>
+        </div>
+        <div class="card-resumo">
+          <div class="cr-label">Documentos</div>
+          <div class="cr-valor" id="res-docs">—</div>
+          <div class="cr-sub">pendentes aprovacao</div>
+        </div>
+        <div class="card-resumo">
+          <div class="cr-label">Templates</div>
+          <div class="cr-valor" id="res-templates">—</div>
+          <div class="cr-sub">disponiveis</div>
+        </div>
+      </div>
+
+      <!-- Últimas medições -->
+      <div class="card-form">
+        <h3>Ultimas medicoes registradas</h3>
+        <div class="tabela-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sensor</th><th>Tipo</th><th>Valor</th><th>Origem</th><th>Data/Hora</th>
+              </tr>
+            </thead>
+            <tbody id="tb-ultimas">
+              <tr><td colspan="5" class="sem-dados">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════
+         TELA: USUARIOS
+    ══════════════════════ -->
+    <section class="tela" id="tela-usuarios">
+
+      <div class="tela-cab">
+        <h2>Usuarios</h2>
+        <p>Cadastre, edite cargos e gerencie o acesso de cada colaborador.</p>
+      </div>
+
+      <!-- Formulário de novo usuário -->
+      <div class="card-form">
+        <h3>Novo usuario</h3>
+        <div class="grade-campos">
+          <div class="campo">
+            <label>Nome completo</label>
+            <input type="text" id="u-nome" placeholder="Ex: João Silva" />
+          </div>
+          <div class="campo">
+            <label>E-mail</label>
+            <input type="email" id="u-email" placeholder="joao@colortextil.com" />
+          </div>
+        </div>
+        <div class="grade-campos">
+          <div class="campo">
+            <label>Senha inicial</label>
+            <input type="password" id="u-senha" placeholder="Minimo 6 caracteres" />
+          </div>
+          <div class="campo">
+            <label>Cargo</label>
+            <select id="u-cargo">
+              <option value="operador">Operador</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="administrador">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primario" onclick="criarUsuario()">
+          <i class="bi bi-person-plus"></i> Criar usuario
+        </button>
+        <div class="feedback" id="fb-usuario"></div>
+      </div>
+
+      <!-- Lista de usuários -->
+      <div class="barra-acao">
+        <strong style="font-size:14px;">Usuarios cadastrados</strong>
+        <button class="btn btn-secundario" onclick="carregarUsuarios()">
+          <i class="bi bi-arrow-clockwise"></i> Atualizar
+        </button>
+      </div>
+
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>E-mail</th><th>Cargo</th><th>Cadastrado em</th><th>Alterar cargo</th></tr>
+          </thead>
+          <tbody id="tb-usuarios">
+            <tr><td colspan="5" class="sem-dados">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════
+         TELA: SENSORES
+    ══════════════════════ -->
+    <section class="tela" id="tela-sensores">
+
+      <div class="tela-cab">
+        <h2>Sensores</h2>
+        <p>Cadastre e gerencie os sensores do sistema de monitoramento.</p>
+      </div>
+
+      <div class="card-form">
+        <h3>Novo sensor</h3>
+        <div class="grade-campos">
+          <div class="campo">
+            <label>Nome do sensor</label>
+            <input type="text" id="s-nome" placeholder="Ex: Sensor 1 - Entrada" maxlength="50" />
+          </div>
+          <div class="campo">
+            <label>Tipo de medicao</label>
+            <select id="s-tipo">
+              <option value="ph">pH</option>
+              <option value="turbidez">Turbidez (NTU)</option>
+              <option value="temperatura">Temperatura (°C)</option>
+              <option value="nivel">Nivel do Reservatorio (%)</option>
+              <option value="vazao">Vazao (L/min)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primario" onclick="criarSensor()">
+          <i class="bi bi-cpu"></i> Cadastrar sensor
+        </button>
+        <div class="feedback" id="fb-sensor"></div>
+      </div>
+
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Cadastrado em</th><th>Remover</th></tr>
+          </thead>
+          <tbody id="tb-sensores">
+            <tr><td colspan="5" class="sem-dados">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════
+         TELA: TEMPLATES
+    ══════════════════════ -->
+    <section class="tela" id="tela-templates">
+
+      <div class="tela-cab">
+        <h2>Templates de Documentos</h2>
+        <p>Crie os modelos que os operadores usarao para preencher documentos.</p>
+      </div>
+
+      <div class="card-form">
+        <h3>Novo template</h3>
+        <div class="grade-campos">
+          <div class="campo">
+            <label>Titulo do template</label>
+            <input type="text" id="t-titulo" placeholder="Ex: Relatorio de Turno" />
+          </div>
+          <div class="campo">
+            <label>Tipo</label>
+            <select id="t-tipo">
+              <option value="relatorio_turno">Relatorio de Turno</option>
+              <option value="laudo_analise">Laudo de Analise</option>
+              <option value="ordem_manutencao">Ordem de Manutencao</option>
+              <option value="registro_ocorrencia">Registro de Ocorrencia</option>
+            </select>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Conteudo do template</label>
+          <!-- O operador vai preencher os campos marcados com [CAMPO] -->
+          <textarea id="t-conteudo" rows="8"
+            placeholder="Digite o modelo do documento. Use [CAMPO] para indicar onde o operador deve preencher.&#10;&#10;Exemplo:&#10;Data: [DATA]&#10;Operador: [NOME_OPERADOR]&#10;Turno: [TURNO]&#10;&#10;pH medido: [PH]&#10;Turbidez: [TURBIDEZ]&#10;Temperatura: [TEMPERATURA]&#10;&#10;Observacoes: [OBSERVACOES]"></textarea>
+          <span class="campo-nota">Use [CAMPO] para marcar onde o operador deve preencher.</span>
+        </div>
+        <button class="btn btn-primario" onclick="criarTemplate()">
+          <i class="bi bi-file-earmark-plus"></i> Salvar template
+        </button>
+        <div class="feedback" id="fb-template"></div>
+      </div>
+
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr><th>Titulo</th><th>Tipo</th><th>Criado em</th><th>Remover</th></tr>
+          </thead>
+          <tbody id="tb-templates">
+            <tr><td colspan="4" class="sem-dados">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════
+         TELA: CONFIGURAÇÕES
+    ══════════════════════ -->
+    <section class="tela" id="tela-configuracoes">
+
+      <div class="tela-cab">
+        <h2>Configuracoes</h2>
+        <p>Limites de alerta para cada parametro monitorado.</p>
+      </div>
+
+      <div class="card-form">
+        <h3>Limites de alerta</h3>
+        <p style="font-size:13px; color:var(--sec); margin-bottom:18px;">
+          Valores fora desses limites geram alertas automaticos no sistema.
+        </p>
+        <div class="grade-campos">
+          <div class="campo">
+            <label>pH minimo</label>
+            <input type="number" id="cfg-ph-min" value="6.5" step="0.1" />
+          </div>
+          <div class="campo">
+            <label>pH maximo</label>
+            <input type="number" id="cfg-ph-max" value="8.5" step="0.1" />
+          </div>
+        </div>
+        <div class="grade-campos">
+          <div class="campo">
+            <label>Turbidez max. (NTU)</label>
+            <input type="number" id="cfg-turb" value="5.0" step="0.1" />
+          </div>
+          <div class="campo">
+            <label>Temperatura max. (°C)</label>
+            <input type="number" id="cfg-temp" value="30.0" step="0.5" />
+          </div>
+        </div>
+        <div class="grade-campos">
+          <div class="campo">
+            <label>Vazao max. (L/min)</label>
+            <input type="number" id="cfg-vazao" value="10.0" step="0.1" />
+          </div>
+          <div class="campo">
+            <label>Nivel minimo reservatorio (%)</label>
+            <input type="number" id="cfg-nivel" value="20" step="1" />
+          </div>
+        </div>
+        <button class="btn btn-primario" onclick="salvarConfig()">
+          <i class="bi bi-check-lg"></i> Salvar configuracoes
+        </button>
+        <div class="feedback" id="fb-config"></div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════
+         TELA: RELATÓRIOS
+    ══════════════════════ -->
+    <section class="tela" id="tela-relatorios">
+
+      <div class="tela-cab">
+        <h2>Relatorios</h2>
+        <p>Consulte e exporte dados do sistema.</p>
+      </div>
+
+      <div class="card-form">
+        <h3>Filtros</h3>
+        <div class="grade-campos tres">
+          <div class="campo">
+            <label>Tipo de dado</label>
+            <select id="rel-tipo">
+              <option value="">Todos</option>
+              <option value="ph">pH</option>
+              <option value="turbidez">Turbidez</option>
+              <option value="temperatura">Temperatura</option>
+              <option value="nivel">Nivel</option>
+              <option value="vazao">Vazao</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Data inicio</label>
+            <input type="text" id="rel-inicio" placeholder="DD/MM/AAAA" />
+          </div>
+          <div class="campo">
+            <label>Data fim</label>
+            <input type="text" id="rel-fim" placeholder="DD/MM/AAAA" />
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primario" onclick="buscarRelatorio()">
+            <i class="bi bi-search"></i> Consultar
+          </button>
+          <button class="btn btn-secundario" onclick="exportarCSV()">
+            <i class="bi bi-download"></i> Exportar CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Sensor</th><th>Tipo</th><th>Valor</th><th>Origem</th><th>Data/Hora</th></tr>
+          </thead>
+          <tbody id="tb-relatorio">
+            <tr><td colspan="6" class="sem-dados">Use os filtros acima para consultar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════
+         TELA: INTEGRAÇÕES
+    ══════════════════════ -->
+    <section class="tela" id="tela-integracoes">
+
+      <div class="tela-cab">
+        <h2>Integracoes</h2>
+        <p>Conexoes externas do sistema.</p>
+      </div>
+
+      <div class="card-form">
+        <h3>API do ESP8266</h3>
+        <div class="campo">
+          <label>URL para envio de dados (configurar no ESP8266)</label>
+          <input type="url" readonly
+            value="https://huvohrqgcrgbdqwhgrro.supabase.co/rest/v1/medicao"
+            style="color:var(--sec); font-size:12px;" />
+          <span class="campo-nota">Configure essa URL no codigo do ESP8266.</span>
+        </div>
+        <div class="bloco-codigo">
+// Headers necessarios no ESP8266:
+// apikey: [sua anon key]
+// Authorization: Bearer [sua anon key]
+// Content-Type: application/json
+// Prefer: return=minimal
+        </div>
+      </div>
+
+      <div class="card-form">
+        <h3>Chatbot Voiceflow</h3>
+        <div class="campo">
+          <label>Script do Voiceflow</label>
+          <textarea id="vf-script" rows="4"
+            placeholder="Cole aqui o script gerado no Voiceflow (Publish > Web)."></textarea>
+          <span class="campo-nota">Apos ativar, o chatbot aparecera em todas as telas.</span>
+        </div>
+        <button class="btn btn-primario" onclick="ativarChatbot()">
+          <i class="bi bi-chat-dots"></i> Ativar chatbot
+        </button>
+        <div class="feedback" id="fb-chatbot"></div>
+      </div>
+
+      <div class="card-form">
+        <h3>Estrutura do banco de dados</h3>
+        <div class="bloco-codigo">
+perfil             → id, nome, email, cargo, criado_em
+sensor             → id, nome_sensor, tipo_sensor, data_cadastro
+medicao            → id_medicao, id_sensor, tipo, valor, data_hora, origem
+configuracao       → id, ph_min, ph_max, turb_max, temp_max
+tarefa             → id, titulo, descricao, atribuido_a, criado_por, status, prioridade, prazo
+template_documento → id, titulo, tipo, conteudo, criado_por
+documento          → id, id_template, titulo, conteudo, status, criado_por, enviado_para, aprovado_por
+alerta             → id, id_medicao, tipo, valor, mensagem, lido
+checklist_item     → id, descricao, obrigatorio, ordem
+checklist_turno    → id, id_operador, id_item, concluido, data_turno
+ordem_manutencao   → id, descricao, equipamento, prioridade, status, solicitado_por
+        </div>
+      </div>
+
+    </section>
+
+  </div><!-- fim #area -->
+</div><!-- fim #conteudo -->
+
+
+<script>
+
+  // ── Configuração do Supabase ──────────────────────────────
+  var SUPA_URL = 'https://huvohrqgcrgbdqwhgrro.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1dm9ocnFnY3JnYmRxd2hncnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMTQ0NDEsImV4cCI6MjA4ODg5MDQ0MX0.1mNShzvzSPfljGKGVwMvDmY6_aiDxeaaHXVZ5K9i6oM';
+  var { createClient } = supabase;
+  var db = createClient(SUPA_URL, SUPA_KEY);
+
+  // Dados do relatório atual (para exportação CSV)
+  var dadosRelatorio = [];
+
+  // ── Inicialização ─────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', function() {
+    verificarSessao();
+    preencherTopbar();
+    carregarDashboard();
+    carregarUsuarios();
+    carregarSensores();
+    carregarTemplates();
+    carregarConfig();
+  });
+
+  // Verifica se o usuário está logado e é admin
+  async function verificarSessao() {
+    var sessao = await db.auth.getSession();
+    if (!sessao.data.session) {
+      window.location.href = 'index.html';
+      return;
+    }
+    var nome  = localStorage.getItem('sgh_nome')  || 'Admin';
+    var cargo = localStorage.getItem('sgh_cargo') || '';
+    if (cargo !== 'administrador') {
+      window.location.href = 'index.html';
+      return;
+    }
+    // Preenche nome no rodapé da sidebar
+    document.getElementById('sb-usuario').textContent = nome;
+    // Saudação no dashboard
+    var h = new Date().getHours();
+    var saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+    document.getElementById('saudacao-admin').textContent = saud + ', ' + nome;
+  }
+
+  // Preenche data no topbar
+  function preencherTopbar() {
+    var data = new Date().toLocaleDateString('pt-BR', {
+      weekday: 'short', day: 'numeric', month: 'short'
+    });
+    document.getElementById('topbar-data').textContent = data;
+  }
+
+  // ── Navegação entre telas ─────────────────────────────────
+  function irPara(tela, link) {
+    // Esconde todas as telas
+    document.querySelectorAll('.tela').forEach(function(t) {
+      t.classList.remove('ativa');
+    });
+    // Remove classe ativo de todos os links
+    document.querySelectorAll('.sb-menu a').forEach(function(a) {
+      a.classList.remove('ativo');
+    });
+    // Mostra a tela escolhida
+    document.getElementById('tela-' + tela).classList.add('ativa');
+    // Marca o link como ativo
+    link.classList.add('ativo');
+    // Atualiza título no topbar
+    document.getElementById('topbar-titulo').textContent = link.textContent.trim();
+
+    return false; // Evita o # no URL
+  }
+
+  // ── DASHBOARD — carrega contadores ───────────────────────
+  async function carregarDashboard() {
+
+    // Conta usuários
+    var r1 = await db.from('perfil').select('id', { count: 'exact', head: true });
+    document.getElementById('res-usuarios').textContent = r1.count || 0;
+
+    // Conta sensores
+    var r2 = await db.from('sensor').select('id', { count: 'exact', head: true });
+    document.getElementById('res-sensores').textContent = r2.count || 0;
+
+    // Conta medições de hoje
+    var hoje = new Date().toISOString().split('T')[0];
+    var r3 = await db.from('medicao')
+      .select('id_medicao', { count: 'exact', head: true })
+      .gte('data_hora', hoje);
+    document.getElementById('res-medicoes').textContent = r3.count || 0;
+
+    // Conta alertas não lidos
+    var r4 = await db.from('alerta')
+      .select('id', { count: 'exact', head: true })
+      .eq('lido', false);
+    document.getElementById('res-alertas').textContent = r4.count || 0;
+
+    // Conta documentos pendentes de aprovação
+    var r5 = await db.from('documento')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'enviado');
+    document.getElementById('res-docs').textContent = r5.count || 0;
+
+    // Conta templates
+    var r6 = await db.from('template_documento').select('id', { count: 'exact', head: true });
+    document.getElementById('res-templates').textContent = r6.count || 0;
+
+    // Carrega as últimas 8 medições
+    var r7 = await db.from('medicao')
+      .select('*, sensor(nome_sensor)')
+      .order('data_hora', { ascending: false })
+      .limit(8);
+
+    var tb = document.getElementById('tb-ultimas');
+    if (!r7.data || r7.data.length === 0) {
+      tb.innerHTML = '<tr><td colspan="5" class="sem-dados">Nenhuma medicao registrada.</td></tr>';
+      return;
+    }
+
+    tb.innerHTML = r7.data.map(function(m) {
+      return '<tr>' +
+        '<td>' + (m.sensor ? m.sensor.nome_sensor : '—') + '</td>' +
+        '<td>' + labelTipo(m.tipo) + '</td>' +
+        '<td>' + m.valor + ' ' + unidade(m.tipo) + '</td>' +
+        '<td>' + (m.origem || '—') + '</td>' +
+        '<td>' + formatarData(m.data_hora) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ── USUÁRIOS ──────────────────────────────────────────────
+
+  // Cria um novo usuário no Supabase Auth + tabela perfil
+  async function criarUsuario() {
+    var nome  = document.getElementById('u-nome').value.trim();
+    var email = document.getElementById('u-email').value.trim();
+    var senha = document.getElementById('u-senha').value;
+    var cargo = document.getElementById('u-cargo').value;
+    var fb    = document.getElementById('fb-usuario');
+
+    if (!nome || !email || !senha) {
+      mostrarFeedback(fb, 'Preencha todos os campos.', 'erro');
+      return;
+    }
+    if (senha.length < 6) {
+      mostrarFeedback(fb, 'A senha deve ter pelo menos 6 caracteres.', 'erro');
+      return;
+    }
+
+    // Cria conta no Supabase Auth
+    var auth = await db.auth.admin ? null : null; // Auth admin requer service_role key
+    // Como usamos anon key, vamos usar signUp e depois atualizar o perfil
+    var result = await db.auth.signUp({ email: email, password: senha });
+
+    if (result.error) {
+      mostrarFeedback(fb, 'Erro: ' + result.error.message, 'erro');
+      return;
+    }
+
+    // Insere o perfil na tabela
+    var uid = result.data.user.id;
+    var ins = await db.from('perfil').insert({
+      id: uid, nome: nome, email: email, cargo: cargo
+    });
+
+    if (ins.error) {
+      mostrarFeedback(fb, 'Erro ao salvar perfil: ' + ins.error.message, 'erro');
+      return;
+    }
+
+    // Limpa campos e atualiza lista
+    document.getElementById('u-nome').value  = '';
+    document.getElementById('u-email').value = '';
+    document.getElementById('u-senha').value = '';
+    mostrarFeedback(fb, 'Usuario criado com sucesso!', 'sucesso');
+    carregarUsuarios();
+  }
+
+  // Carrega a lista de usuários cadastrados
+  async function carregarUsuarios() {
+    var result = await db.from('perfil')
+      .select('*')
+      .order('criado_em', { ascending: false });
+
+    var tb = document.getElementById('tb-usuarios');
+    if (!result.data || result.data.length === 0) {
+      tb.innerHTML = '<tr><td colspan="5" class="sem-dados">Nenhum usuario cadastrado.</td></tr>';
+      return;
+    }
+
+    tb.innerHTML = result.data.map(function(u) {
+      // Select inline para alterar o cargo direto na tabela
+      var opts = ['operador', 'supervisor', 'administrador'].map(function(c) {
+        return '<option value="' + c + '"' + (u.cargo === c ? ' selected' : '') + '>' +
+               c.charAt(0).toUpperCase() + c.slice(1) + '</option>';
+      }).join('');
+
+      return '<tr>' +
+        '<td>' + (u.nome || '—') + '</td>' +
+        '<td>' + (u.email || '—') + '</td>' +
+        '<td><span class="badge badge-' + (u.cargo || 'operador') + '">' + (u.cargo || '—') + '</span></td>' +
+        '<td>' + formatarData(u.criado_em) + '</td>' +
+        '<td>' +
+          '<select onchange="alterarCargo(\'' + u.id + '\', this.value)" style="padding:4px 8px; font-size:12px;">' +
+          opts + '</select>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // Altera o cargo de um usuário diretamente na tabela
+  async function alterarCargo(uid, novoCargo) {
+    var result = await db.from('perfil')
+      .update({ cargo: novoCargo })
+      .eq('id', uid);
+
+    if (result.error) {
+      alert('Erro ao alterar cargo: ' + result.error.message);
+    }
+  }
+
+  // ── SENSORES ──────────────────────────────────────────────
+
+  async function criarSensor() {
+    var nome = document.getElementById('s-nome').value.trim();
+    var tipo = document.getElementById('s-tipo').value;
+    var fb   = document.getElementById('fb-sensor');
+
+    if (!nome) {
+      mostrarFeedback(fb, 'Informe o nome do sensor.', 'erro');
+      return;
+    }
+
+    var result = await db.from('sensor').insert({
+      nome_sensor: nome,
+      tipo_sensor: tipo,
+      data_cadastro: new Date().toISOString()
+    });
+
+    if (result.error) {
+      mostrarFeedback(fb, 'Erro: ' + result.error.message, 'erro');
+      return;
+    }
+
+    document.getElementById('s-nome').value = '';
+    mostrarFeedback(fb, 'Sensor cadastrado com sucesso!', 'sucesso');
+    carregarSensores();
+  }
+
+  async function carregarSensores() {
+    var result = await db.from('sensor')
+      .select('*')
+      .order('data_cadastro', { ascending: false });
+
+    var tb = document.getElementById('tb-sensores');
+    if (!result.data || result.data.length === 0) {
+      tb.innerHTML = '<tr><td colspan="5" class="sem-dados">Nenhum sensor cadastrado.</td></tr>';
+      return;
+    }
+
+    tb.innerHTML = result.data.map(function(s) {
+      return '<tr>' +
+        '<td>' + s.id + '</td>' +
+        '<td>' + s.nome_sensor + '</td>' +
+        '<td>' + labelTipo(s.tipo_sensor) + '</td>' +
+        '<td>' + formatarData(s.data_cadastro) + '</td>' +
+        '<td>' +
+          '<button class="btn btn-perigo" style="padding:4px 10px; font-size:12px;" ' +
+          'onclick="removerSensor(' + s.id + ')">' +
+          '<i class="bi bi-trash"></i></button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  async function removerSensor(id) {
+    if (!confirm('Remover este sensor? Isso tambem remove as medicoes associadas.')) return;
+    await db.from('sensor').delete().eq('id', id);
+    carregarSensores();
+  }
+
+  // ── TEMPLATES DE DOCUMENTOS ───────────────────────────────
+
+  async function criarTemplate() {
+    var titulo   = document.getElementById('t-titulo').value.trim();
+    var tipo     = document.getElementById('t-tipo').value;
+    var conteudo = document.getElementById('t-conteudo').value.trim();
+    var fb       = document.getElementById('fb-template');
+    var uid      = localStorage.getItem('sgh_uid');
+
+    if (!titulo || !conteudo) {
+      mostrarFeedback(fb, 'Preencha o titulo e o conteudo.', 'erro');
+      return;
+    }
+
+    var result = await db.from('template_documento').insert({
+      titulo: titulo,
+      tipo: tipo,
+      conteudo: conteudo,
+      criado_por: uid,
+      criado_em: new Date().toISOString()
+    });
+
+    if (result.error) {
+      mostrarFeedback(fb, 'Erro: ' + result.error.message, 'erro');
+      return;
+    }
+
+    document.getElementById('t-titulo').value   = '';
+    document.getElementById('t-conteudo').value = '';
+    mostrarFeedback(fb, 'Template salvo com sucesso!', 'sucesso');
+    carregarTemplates();
+  }
+
+  async function carregarTemplates() {
+    var result = await db.from('template_documento')
+      .select('*')
+      .order('criado_em', { ascending: false });
+
+    var tb = document.getElementById('tb-templates');
+    if (!result.data || result.data.length === 0) {
+      tb.innerHTML = '<tr><td colspan="4" class="sem-dados">Nenhum template cadastrado.</td></tr>';
+      return;
+    }
+
+    tb.innerHTML = result.data.map(function(t) {
+      return '<tr>' +
+        '<td>' + t.titulo + '</td>' +
+        '<td>' + labelDocTipo(t.tipo) + '</td>' +
+        '<td>' + formatarData(t.criado_em) + '</td>' +
+        '<td>' +
+          '<button class="btn btn-perigo" style="padding:4px 10px; font-size:12px;" ' +
+          'onclick="removerTemplate(\'' + t.id + '\')">' +
+          '<i class="bi bi-trash"></i></button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  async function removerTemplate(id) {
+    if (!confirm('Remover este template?')) return;
+    await db.from('template_documento').delete().eq('id', id);
+    carregarTemplates();
+  }
+
+  // ── CONFIGURAÇÕES ─────────────────────────────────────────
+
+  async function carregarConfig() {
+    var result = await db.from('configuracao').select('*').eq('id', 1).single();
+    if (!result.data) return;
+    var c = result.data;
+    document.getElementById('cfg-ph-min').value = c.ph_min  || 6.5;
+    document.getElementById('cfg-ph-max').value = c.ph_max  || 8.5;
+    document.getElementById('cfg-turb').value   = c.turb_max || 5.0;
+    document.getElementById('cfg-temp').value   = c.temp_max || 30.0;
+  }
+
+  async function salvarConfig() {
+    var fb = document.getElementById('fb-config');
+    var result = await db.from('configuracao').upsert({
+      id:       1,
+      ph_min:   parseFloat(document.getElementById('cfg-ph-min').value),
+      ph_max:   parseFloat(document.getElementById('cfg-ph-max').value),
+      turb_max: parseFloat(document.getElementById('cfg-turb').value),
+      temp_max: parseFloat(document.getElementById('cfg-temp').value),
+      atualizado_em: new Date().toISOString()
+    });
+
+    if (result.error) {
+      mostrarFeedback(fb, 'Erro ao salvar: ' + result.error.message, 'erro');
+    } else {
+      mostrarFeedback(fb, 'Configuracoes salvas com sucesso!', 'sucesso');
+    }
+  }
+
+  // ── RELATÓRIOS ────────────────────────────────────────────
+
+  async function buscarRelatorio() {
+    var tipo   = document.getElementById('rel-tipo').value;
+    var inicio = document.getElementById('rel-inicio').value;
+    var fim    = document.getElementById('rel-fim').value;
+    var tb     = document.getElementById('tb-relatorio');
+
+    tb.innerHTML = '<tr><td colspan="6" class="sem-dados">Buscando...</td></tr>';
+
+    var query = db.from('medicao')
+      .select('*, sensor(nome_sensor)')
+      .order('data_hora', { ascending: false })
+      .limit(200);
+
+    if (tipo)   query = query.eq('tipo', tipo);
+    if (inicio) query = query.gte('data_hora', converterData(inicio));
+    if (fim)    query = query.lte('data_hora', converterData(fim) + 'T23:59:59');
+
+    var result = await query;
+    dadosRelatorio = result.data || [];
+
+    if (dadosRelatorio.length === 0) {
+      tb.innerHTML = '<tr><td colspan="6" class="sem-dados">Nenhum resultado encontrado.</td></tr>';
+      return;
+    }
+
+    tb.innerHTML = dadosRelatorio.map(function(m, i) {
+      return '<tr>' +
+        '<td>' + (i + 1) + '</td>' +
+        '<td>' + (m.sensor ? m.sensor.nome_sensor : '—') + '</td>' +
+        '<td>' + labelTipo(m.tipo) + '</td>' +
+        '<td>' + m.valor + ' ' + unidade(m.tipo) + '</td>' +
+        '<td>' + (m.origem || '—') + '</td>' +
+        '<td>' + formatarData(m.data_hora) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // Exporta os dados da consulta atual como CSV
+  function exportarCSV() {
+    if (dadosRelatorio.length === 0) {
+      alert('Realize uma consulta antes de exportar.');
+      return;
+    }
+
+    var linhas = ['Sensor,Tipo,Valor,Unidade,Origem,Data/Hora'];
+    dadosRelatorio.forEach(function(m) {
+      linhas.push([
+        m.sensor ? m.sensor.nome_sensor : '',
+        m.tipo,
+        m.valor,
+        unidade(m.tipo),
+        m.origem || '',
+        formatarData(m.data_hora)
+      ].join(','));
+    });
+
+    // Cria e dispara o download
+    var blob = new Blob([linhas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    var url  = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href     = url;
+    link.download = 'sgh_relatorio_' + new Date().toISOString().split('T')[0] + '.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── INTEGRAÇÕES — chatbot ─────────────────────────────────
+
+  function ativarChatbot() {
+    var script = document.getElementById('vf-script').value.trim();
+    var fb     = document.getElementById('fb-chatbot');
+
+    if (!script) {
+      mostrarFeedback(fb, 'Cole o script do Voiceflow antes de ativar.', 'erro');
+      return;
+    }
+
+    // Injeta o script na página dinamicamente
+    var div = document.createElement('div');
+    div.innerHTML = script;
+    document.body.appendChild(div);
+    div.querySelectorAll('script').forEach(function(s) {
+      var novo = document.createElement('script');
+      if (s.src) novo.src = s.src;
+      else novo.textContent = s.textContent;
+      document.body.appendChild(novo);
+    });
+
+    mostrarFeedback(fb, 'Chatbot ativado com sucesso!', 'sucesso');
+  }
+
+  // ── Sair do sistema ───────────────────────────────────────
+  async function sair() {
+    await db.auth.signOut();
+    localStorage.clear();
+    window.location.href = 'index.html';
+  }
+
+  // ── Utilitários ───────────────────────────────────────────
+
+  // Exibe mensagem de feedback (sucesso ou erro) e some após 3s
+  function mostrarFeedback(el, msg, tipo) {
+    el.textContent = msg;
+    el.className   = 'feedback ' + tipo;
+    el.style.display = 'block';
+    setTimeout(function() { el.style.display = 'none'; }, 3000);
+  }
+
+  // Converte data DD/MM/AAAA para AAAA-MM-DD (formato ISO)
+  function converterData(str) {
+    var partes = str.split('/');
+    if (partes.length !== 3) return str;
+    return partes[2] + '-' + partes[1] + '-' + partes[0];
+  }
+
+  // Formata timestamp ISO para DD/MM/AAAA HH:MM
+  function formatarData(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  // Rótulo legível para o tipo de medição
+  function labelTipo(tipo) {
+    var labels = {
+      ph: 'pH', turbidez: 'Turbidez',
+      temperatura: 'Temperatura', nivel: 'Nivel', vazao: 'Vazao'
+    };
+    return labels[tipo] || tipo;
+  }
+
+  // Unidade de medida para cada tipo
+  function unidade(tipo) {
+    var un = { ph: '', turbidez: 'NTU', temperatura: '°C', nivel: '%', vazao: 'L/min' };
+    return un[tipo] || '';
+  }
+
+  // Rótulo para tipo de documento
+  function labelDocTipo(tipo) {
+    var labels = {
+      relatorio_turno: 'Relatorio de Turno',
+      laudo_analise: 'Laudo de Analise',
+      ordem_manutencao: 'Ordem de Manutencao',
+      registro_ocorrencia: 'Registro de Ocorrencia'
+    };
+    return labels[tipo] || tipo;
+  }
+
+</script>
+
+</body>
+</html>
